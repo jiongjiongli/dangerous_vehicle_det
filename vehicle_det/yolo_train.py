@@ -32,14 +32,14 @@ class TensorboardLogger:
                 warnings.simplefilter('ignore', category=UserWarning)  # suppress jit trace warning
                 self.writer.add_graph(torch.jit.trace(de_parallel(trainer.model), im, strict=False), [])
         except Exception as e:
-            LOGGER.warning(f'WARNING ⚠️ TensorBoard graph visualization failure {e}')
+            logger.warning(f'WARNING ⚠️ TensorBoard graph visualization failure {e}')
 
     def on_pretrain_routine_start(self, trainer):
             tensorboard_log_dir_path = Path('/project/train/tensorboard')
             tensorboard_log_dir_path.mkdir(parents=True, exist_ok=True)
             self.writer = SummaryWriter(tensorboard_log_dir_path.as_posix())
             prefix = colorstr('TensorBoard: ')
-            LOGGER.info(f"{prefix}Start with 'tensorboard --logdir {tensorboard_log_dir_path.as_posix()}', view at http://localhost:6006/")
+            logger.info(f"{prefix}Start with 'tensorboard --logdir {tensorboard_log_dir_path.as_posix()}', view at http://localhost:6006/")
 
     def on_train_start(self, trainer):
         self._log_tensorboard_graph(trainer)
