@@ -4,8 +4,8 @@ import shutil
 
 import distutils.version
 from torch.utils.tensorboard import SummaryWriter
-from ultralytics.yolo.utils import USER_CONFIG_DIR, LOGGER as logger
-from ultralytics.yolo.utils.callbacks.tensorboard import callbacks as tb_callbacks
+from ultralytics.utils import USER_CONFIG_DIR, LOGGER as logger, colorstr
+from ultralytics.utils.callbacks.tensorboard import callbacks as tb_callbacks
 from ultralytics import YOLO
 
 
@@ -17,10 +17,32 @@ class TensorboardLogger:
         for k, v in scalars.items():
             self.writer.add_scalar(k, v, step)
 
+    def _log_tensorboard_graph(self, trainer):
+        """Log model graph to TensorBoard."""
+        try:
+            import warnings
+
+            from ultralytics.utils.torch_utils import de_parallel, torch
+
+            imgsz = trainer.args.imgsz
+            imgsz = (imgsz, imgsz) if isinstance(imgsz, int) else imgsz
+            p = next(trainer.model.parameters())  # for device, type
+            im = torch.zeros((1, 3, *imgsz), device=p.device, dtype=p.dtype)  # input image (must be zeros, not empty)
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', category=UserWarning)  # suppress jit trace warning
+                self.writer.add_graph(torch.jit.trace(de_parallel(trainer.model), im, strict=False), [])
+        except Exception as e:
+            LOGGER.warning(f'WARNING ⚠️ TensorBoard graph visualization failure {e}')
+
     def on_pretrain_routine_start(self, trainer):
             tensorboard_log_dir_path = Path('/project/train/tensorboard')
             tensorboard_log_dir_path.mkdir(parents=True, exist_ok=True)
             self.writer = SummaryWriter(tensorboard_log_dir_path.as_posix())
+            prefix = colorstr('TensorBoard: ')
+            LOGGER.info(f"{prefix}Start with 'tensorboard --logdir {tensorboard_log_dir_path.as_posix()}', view at http://localhost:6006/")
+
+    def on_train_start(self, trainer):
+        self._log_tensorboard_graph(trainer)
 
     def on_batch_end(self, trainer):
         self._log_scalars(trainer.label_loss_items(trainer.tloss, prefix="train"), trainer.epoch + 1)
@@ -60,6 +82,7 @@ def main():
 
     tb_logger = TensorboardLogger()
     tb_callbacks['on_pretrain_routine_start'] = tb_logger.on_pretrain_routine_start
+    tb_callbacks['on_train_start'] = tb_logger.on_train_start
     tb_callbacks['on_fit_epoch_end'] = tb_logger.on_fit_epoch_end
     tb_callbacks['on_batch_end'] = tb_logger.on_batch_end
 
