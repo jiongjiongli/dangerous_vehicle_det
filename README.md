@@ -20,6 +20,6 @@
 # 3. Test
 
 ```
-!python /project/train/src_repo/ji.py
+!python /project/ev_sdk/src/ji.py
 ```
 
