@@ -61,7 +61,7 @@ def process_image(model, input_image=None, args=None, **kwargs):
                 'width':int(xyxy[2]-xyxy[0]),
                 'height':int(xyxy[3]-xyxy[1]),
                 'confidence':float(conf),
-                'name':names[int(class_index)]
+                'name':class_names[int(class_index)]
             }
 
             fake_result['algorithm_data']['target_info'].append(target_info)
@@ -72,7 +72,7 @@ def process_image(model, input_image=None, args=None, **kwargs):
                 'width':int(xyxy[2]-xyxy[0]),
                 'height':int(xyxy[3]-xyxy[1]),
                 'confidence':float(conf),
-                'name':names[int(class_index)]
+                'name':class_names[int(class_index)]
             }
 
             fake_result['model_data']['objects'].append(object_info)
@@ -89,7 +89,7 @@ def main():
     data_root_path = Path(r'/home/data')
 
     anno_file_paths = list(data_root_path.rglob('*.xml'))
-    anno_file_paths = anno_file_paths[:1]
+    anno_file_paths = anno_file_paths[:2]
 
     model = init()
 
@@ -101,6 +101,10 @@ def main():
         image_file_path = anno_file_path.parent / filename
         img = cv2.imread(image_file_path.as_posix())
         result_str = process_image(model, img)
+
+        logger.info(r'image_file_path: {}'.format(image_file_path))
+
+        logger.info(r'result_str: {}'.format(result_str))
 
 if __name__ == '__main__':
     main()
