@@ -22,7 +22,7 @@ cp -r /project/train/src_repo/dangerous_vehicle_det/vehicle_det /project/train/s
 
 cp /project/train/src_repo/dangerous_vehicle_det/vehicle_det/ji.py /project/ev_sdk/src/
 
-rm -rf /project/train/models/*
+# rm -rf /project/train/models/*
 rm -rf /project/train/tensorboard/*
 rm -rf /project/train/log/*
 rm -rf /project/train/result-graphs/*
