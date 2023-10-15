@@ -23,7 +23,7 @@ def init():
     set_logging(log_file_path)
 
     model_save_dir_path = Path('/project/train/models')
-    model_file_path = model_save_dir_path  / 'train/weights' / 'last.pt'
+    model_file_path = model_save_dir_path  / 'train/weights' / 'best.pt'
 
     model = YOLO(model_file_path.as_posix())
     return model
