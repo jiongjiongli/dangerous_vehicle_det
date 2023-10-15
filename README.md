@@ -15,3 +15,11 @@
 !bash /project/train/src_repo/start_train.sh
 ```
 
+
+
+# 3. Test
+
+```
+!python /project/train/src_repo/ji.py
+```
+

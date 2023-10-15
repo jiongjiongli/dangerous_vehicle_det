@@ -20,6 +20,8 @@ cp /project/train/src_repo/dangerous_vehicle_det/vehicle_det/start_train.sh /pro
 
 cp -r /project/train/src_repo/dangerous_vehicle_det/vehicle_det /project/train/src_repo/ultralytics/
 
+cp /project/train/src_repo/dangerous_vehicle_det/vehicle_det/ji.py /project/ev_sdk/src/
+
 rm -rf /project/train/models/*
 rm -rf /project/train/tensorboard/*
 rm -rf /project/train/log/*
