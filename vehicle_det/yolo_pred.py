@@ -18,6 +18,7 @@ def set_logging(log_file_path):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
+
 def init():
     log_file_path = r'/project/train/log/log.txt'
     set_logging(log_file_path)

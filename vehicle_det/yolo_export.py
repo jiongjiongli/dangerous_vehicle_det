@@ -11,6 +11,13 @@ from ultralytics.utils import LOGGER as logger
 from ultralytics import YOLO
 
 
+def set_logging(log_file_path):
+    file_handler = logging.FileHandler(Path(log_file_path).as_posix())
+    file_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
 
 def init():
     log_file_path = r'/project/train/log/log.txt'
