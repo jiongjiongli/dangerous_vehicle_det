@@ -1,4 +1,5 @@
 
+pip install py-cpuinfo onnxsim
 
 cd /project/train/src_repo
 

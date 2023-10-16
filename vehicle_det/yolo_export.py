@@ -32,7 +32,7 @@ def init():
 
 def main():
     model = init()
-    model.export(format='onnx')
+    model.export(format='onnx', simplify=True, half=True)
 
 
 if __name__ == '__main__':

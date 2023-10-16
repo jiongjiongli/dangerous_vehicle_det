@@ -24,7 +24,7 @@ def init():
     set_logging(log_file_path)
 
     model_save_dir_path = Path('/project/train/models')
-    model_file_path = model_save_dir_path  / 'train/weights' / 'best.pt'
+    model_file_path = model_save_dir_path  / 'train/weights' / 'best.onnx'
 
     model = YOLO(model_file_path.as_posix())
     return model
