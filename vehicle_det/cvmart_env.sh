@@ -31,4 +31,4 @@ rm -rf /project/train/tensorboard/*
 rm -rf /project/train/log/*
 rm -rf /project/train/result-graphs/*
 
-
+echo 'Completed cvmart_env!'
