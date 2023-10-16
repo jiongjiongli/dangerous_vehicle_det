@@ -28,6 +28,7 @@ def init():
     model = YOLO(model_file_path.as_posix())
     return model
 
+
 def process_image(model, input_image=None, args=None, **kwargs):
     fake_result = {
         'algorithm_data': {
