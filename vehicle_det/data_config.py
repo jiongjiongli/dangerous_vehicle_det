@@ -37,6 +37,7 @@ class DataConfigManager:
 
     def generate(self):
         anno_info_list = self.parse_anno_info()
+        self.analyze_anno_infos(anno_info_list)
         self.generate_yolo_configs(anno_info_list)
 
     def parse_anno_info(self):
@@ -70,6 +71,35 @@ class DataConfigManager:
             anno_info_list.append(anno_info)
 
         return anno_info_list
+
+    def analyze_anno_infos(self, anno_info_list):
+        class_image_dict = {}
+        class_obj_dict = {}
+        num_gt_dict = {}
+
+        for anno_info in anno_info_list:
+            bnd_box_list = anno_info['bnd_box_list']
+            class_names = []
+
+            for bnd_box_dict in bnd_box_list:
+                class_name = bnd_box_dict['class_name']
+                class_obj_dict.setdefault(class_name, 0)
+                class_obj_dict[class_name] += 1
+
+                if class_name not in class_names:
+                    class_names.append(class_name)
+
+            for class_name in class_names:
+                class_image_dict.setdefault(class_name, 0)
+                class_image_dict[class_name] += 1
+
+            num_gt = len(bnd_box_list)
+            num_gt_dict.setdefault(num_gt, 0)
+            num_gt_dict[num_gt] += 1
+
+        logging.info(r'class_image_dict: {}'.format(class_image_dict))
+        logging.info(r'class_obj_dict: {}'.format(class_obj_dict))
+        logging.info(r'num_gt_dict: {}'.format(num_gt_dict))
 
     def generate_yolo_configs(self,
                               anno_info_list,
