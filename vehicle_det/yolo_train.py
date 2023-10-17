@@ -100,7 +100,7 @@ def main():
         batch=8,
         seed=7,
         epochs=150,
-        cls: 1.0,
+        cls=1.0,
         project=model_save_dir_path.as_posix())
 
 

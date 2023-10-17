@@ -41,7 +41,7 @@ def process_image(model, input_image=None, args=None, **kwargs):
     }
 
     conf_thresh = 0.25
-    iou_thresh = 0.8
+    iou_thresh = 0.72
 
     results = model(input_image, conf=conf_thresh, iou=iou_thresh)
 
