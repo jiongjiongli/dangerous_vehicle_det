@@ -101,8 +101,6 @@ def process_image(model, input_image=None, args=None, **kwargs):
         cls_tensor  = boxes.cls
 
         for xyxy, conf, class_index in zip(xyxy_tensor, conf_tensor, cls_tensor):
-            target_count += 1
-
             if class_names[int(class_index)] in warning_types:
                 target_info = {
                     'x':int(xyxy[0]),
@@ -114,6 +112,7 @@ def process_image(model, input_image=None, args=None, **kwargs):
                 }
 
                 fake_result['algorithm_data']['target_info'].append(target_info)
+                target_count += 1
 
             object_info = {
                 'x':int(xyxy[0]),
