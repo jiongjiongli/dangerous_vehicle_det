@@ -112,6 +112,7 @@ def find_model_file_path(default_model_file_path):
 def main():
     repo_dir_path = Path('/project/train/src_repo')
     default_model_file_path = repo_dir_path / 'yolov8n.pt'
+    model_save_dir_path = Path('/project/train/models')
     data_root_path = Path(r'/home/data')
     dataset_config_file_path = data_root_path / 'custom_dataset.yaml'
 
