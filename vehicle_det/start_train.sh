@@ -14,11 +14,11 @@ mkdir -p /project/train/log
 rm -rf /project/train/result-graphs/*
 mkdir -p /project/train/result-graphs
 
-# echo 'Start data_config...'
-# python vehicle_det/data_config.py
+echo 'Start data_config...'
+python vehicle_det/data_config.py
 
-# echo 'Start cvmart_train...'
-# python vehicle_det/yolo_train.py
+echo 'Start cvmart_train...'
+python vehicle_det/yolo_train.py
 
 echo 'Start export...'
 python vehicle_det/yolo_export.py

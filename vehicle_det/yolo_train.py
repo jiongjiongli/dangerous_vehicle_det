@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import re
 import shutil
 
 import distutils.version
@@ -63,13 +64,58 @@ class TensorboardLogger:
                 shutil.copyfile(file_path, dest_file_path)
 
 
+def find_model_file_path(default_model_file_path):
+    model_save_dir_path = Path('/project/train/models')
+    child_paths = list(model_save_dir_path.glob('train*'))
+
+    model_file_infos = []
+
+    for child_path in child_paths:
+        if not child_path.is_dir():
+            continue
+
+        dir_name = child_path.name
+        model_file_path = child_path  / 'weights' / 'last.pt'
+
+        if not model_file_path.exists():
+            continue
+
+        model_file_info = {
+            'model_file_path': model_file_path,
+            'dir_name': dir_name
+        }
+
+        model_file_infos.append(model_file_info)
+
+    if not model_file_infos:
+        return default_model_file_path
+
+    best_model_file_path = None
+    best_dir_index = -1
+
+    for model_file_info in model_file_infos:
+        dir_name = model_file_info['dir_name']
+        match_results = re.match(r'^train([0-9]*$)', dir_name)
+
+        if match_results:
+            dir_index = int(match_results.group(1))
+        else:
+            dir_index = 0
+
+        if dir_index > best_dir_index:
+            best_dir_index = dir_index
+            best_model_file_path = model_file_info['model_file_path']
+
+    return best_model_file_path
+
+
 def main():
-    repo_dir_path = Path('/project/train/src_repo')
-    # model_file_path = repo_dir_path / 'yolov8n.pt'
+    repo_dir_path = Path('/project/train/src_repo')3
+    default_model_file_path = repo_dir_path / 'yolov8n.pt'
     data_root_path = Path(r'/home/data')
     dataset_config_file_path = data_root_path / 'custom_dataset.yaml'
-    model_save_dir_path = Path('/project/train/models')
-    model_file_path = model_save_dir_path  / 'train/weights' / 'last.pt'
+
+    model_file_path = find_model_file_path(default_model_file_path)
     result_graphs_dir_path = Path('/project/train/result-graphs')
     font_file_names = ['Arial.ttf']
     log_file_path = Path('/project/train/log/log.txt')
@@ -92,6 +138,8 @@ def main():
         font_file_path = repo_dir_path / font_file_name
         dest_file_path = USER_CONFIG_DIR / font_file_name
         shutil.copyfile(font_file_path, dest_file_path)
+
+    logger.info(r'model_file_path: {}'.format(model_file_path))
 
     model = YOLO(model_file_path.as_posix())
 
