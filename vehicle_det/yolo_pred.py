@@ -24,7 +24,7 @@ def init():
     set_logging(log_file_path)
 
     model_save_dir_path = Path('/project/train/models')
-    model_file_path = model_save_dir_path  / 'train/weights' / 'best.onnx'
+    model_file_path = model_save_dir_path  / 'train/weights' / 'best.pt'
 
     model = YOLO(model_file_path.as_posix())
     return model
@@ -41,7 +41,7 @@ def process_image(model, input_image=None, args=None, **kwargs):
     }
 
     conf_thresh = 0.25
-    iou_thresh = 0.7
+    iou_thresh = 0.8
 
     results = model(input_image, conf=conf_thresh, iou=iou_thresh)
 

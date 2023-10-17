@@ -1,5 +1,7 @@
 
-pip install py-cpuinfo onnxsim
+pip uninstall -y onnxruntime
+
+pip install py-cpuinfo onnxruntime-gpu, onnxsim
 
 cd /project/train/src_repo
 
