@@ -50,7 +50,7 @@ def find_model_file_path():
 
     for model_file_info in model_file_infos:
         dir_name = model_file_info['dir_name']
-        match_results = re.match(r'^train([0-9]*$)', dir_name)
+        match_results = re.match(r'^train([0-9]+$)', dir_name)
 
         if match_results:
             dir_index = int(match_results.group(1))
