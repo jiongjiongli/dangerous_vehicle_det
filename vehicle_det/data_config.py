@@ -100,6 +100,17 @@ class DataConfigManager:
         logging.info(r'class_image_dict: {}'.format(class_image_dict))
         logging.info(r'class_obj_dict: {}'.format(class_obj_dict))
         logging.info(r'num_gt_dict: {}'.format(num_gt_dict))
+        dataset_info_dict = {
+            'class_image_dict': class_image_dict,
+            'class_obj_dict': class_obj_dict,
+            'num_gt_dict': num_gt_dict
+        }
+
+        dataset_info_file_path = config_file_path_dict['dataset_info']
+        with open(dataset_info_file_path.as_posix(), 'w') as file_stream:
+            json.dump(dataset_info_dict,
+                      file_stream,
+                      indent=4)
 
     def generate_yolo_configs(self,
                               anno_info_list,
@@ -235,6 +246,7 @@ def main():
         'train': data_root_path / 'train.txt',
         'val': data_root_path / 'val.txt',
         'dataset': data_root_path / 'custom_dataset.yaml'
+        'dataset_info': data_root_path / 'dataset_info.yaml'
     }
 
     log_file_path = '/project/train/log/log.txt'
