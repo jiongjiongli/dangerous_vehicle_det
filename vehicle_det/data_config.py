@@ -106,7 +106,7 @@ class DataConfigManager:
             'num_gt_dict': num_gt_dict
         }
 
-        dataset_info_file_path = config_file_path_dict['dataset_info']
+        dataset_info_file_path = self.config_file_path_dict['dataset_info']
         with open(dataset_info_file_path.as_posix(), 'w') as file_stream:
             json.dump(dataset_info_dict,
                       file_stream,
