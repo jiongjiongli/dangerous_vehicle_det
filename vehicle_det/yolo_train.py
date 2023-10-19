@@ -64,9 +64,11 @@ class TensorboardLogger:
                 shutil.copyfile(file_path, dest_file_path)
 
 
-def find_model_file_path(default_model_file_path):
+def find_model_file_path(default_model_file_path, is_best=False):
     model_save_dir_path = Path('/project/train/models')
     child_paths = list(model_save_dir_path.glob('train*'))
+
+    model_file_name = 'best.pt' if is_best else 'last.pt'
 
     model_file_infos = []
 
@@ -75,7 +77,7 @@ def find_model_file_path(default_model_file_path):
             continue
 
         dir_name = child_path.name
-        model_file_path = child_path  / 'weights' / 'last.pt'
+        model_file_path = child_path  / 'weights' / model_file_name
 
         if not model_file_path.exists():
             continue
@@ -116,7 +118,8 @@ def main():
     data_root_path = Path(r'/home/data')
     dataset_config_file_path = data_root_path / 'custom_dataset.yaml'
 
-    model_file_path = find_model_file_path(default_model_file_path)
+    model_file_path = find_model_file_path(default_model_file_path,
+                                           is_best=True)
     result_graphs_dir_path = Path('/project/train/result-graphs')
     font_file_names = ['Arial.ttf']
     log_file_path = Path('/project/train/log/log.txt')
@@ -146,10 +149,11 @@ def main():
 
     model.train(
         data=dataset_config_file_path.as_posix(),
-        batch=8,
+        batch=16,
         seed=7,
-        epochs=150,
-        cls=1.0,
+        epochs=300,
+        # warmup_epochs=0,
+        # cls=1.0,
         project=model_save_dir_path.as_posix())
 
 

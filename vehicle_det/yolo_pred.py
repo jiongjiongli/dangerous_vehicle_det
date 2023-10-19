@@ -4,6 +4,7 @@ import re
 import logging
 from xml.etree import ElementTree as ET
 import cv2
+import numpy as np
 import sys
 
 sys.path.append('/project/train/src_repo/ultralytics')
@@ -64,17 +65,6 @@ def find_model_file_path():
     return best_model_file_path
 
 
-def init():
-    log_file_path = r'/project/train/log/log.txt'
-    set_logging(log_file_path)
-
-    model_file_path = find_model_file_path()
-    logger.info(r'model_file_path: {}'.format(model_file_path))
-
-    model = YOLO(model_file_path.as_posix())
-    return model
-
-
 def process_image(model, input_image=None, args=None, **kwargs):
     fake_result = {
         'algorithm_data': {
@@ -89,7 +79,8 @@ def process_image(model, input_image=None, args=None, **kwargs):
     iou_thresh = 0.7
     warning_types = ['dangerous_van', 'dangerous_tank']
 
-    results = model(input_image, conf=conf_thresh, iou=iou_thresh)
+    results = model(input_image, conf=conf_thresh,
+                    iou=iou_thresh, half=True)
 
     target_count = 0
 
@@ -101,18 +92,18 @@ def process_image(model, input_image=None, args=None, **kwargs):
         cls_tensor  = boxes.cls
 
         for xyxy, conf, class_index in zip(xyxy_tensor, conf_tensor, cls_tensor):
-            if class_names[int(class_index)] in warning_types:
-                target_info = {
-                    'x':int(xyxy[0]),
-                    'y':int(xyxy[1]),
-                    'width':int(xyxy[2]-xyxy[0]),
-                    'height':int(xyxy[3]-xyxy[1]),
-                    'confidence':float(conf),
-                    'name':class_names[int(class_index)]
-                }
+            # if class_names[int(class_index)] in warning_types:
+            #     target_info = {
+            #         'x':int(xyxy[0]),
+            #         'y':int(xyxy[1]),
+            #         'width':int(xyxy[2]-xyxy[0]),
+            #         'height':int(xyxy[3]-xyxy[1]),
+            #         'confidence':float(conf),
+            #         'name':class_names[int(class_index)]
+            #     }
 
-                fake_result['algorithm_data']['target_info'].append(target_info)
-                target_count += 1
+            #     fake_result['algorithm_data']['target_info'].append(target_info)
+            #     target_count += 1
 
             object_info = {
                 'x':int(xyxy[0]),
@@ -131,6 +122,22 @@ def process_image(model, input_image=None, args=None, **kwargs):
 
     result_str = json.dumps(fake_result, indent = 4)
     return result_str
+
+
+def init():
+    log_file_path = r'/project/train/log/log.txt'
+    set_logging(log_file_path)
+
+    model_file_path = find_model_file_path()
+    logger.info(r'model_file_path: {}'.format(model_file_path))
+
+    model = YOLO(model_file_path.as_posix())
+    random_img = np.random.randint(0,
+                                   256,
+                                   size=(512, 512, 3),
+                                   dtype=np.uint8)
+    process_image(model, random_img)
+    return model
 
 
 def main():
