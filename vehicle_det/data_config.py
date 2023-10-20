@@ -246,7 +246,7 @@ def main():
         'train': data_root_path / 'train.txt',
         'val': data_root_path / 'val.txt',
         'dataset': data_root_path / 'custom_dataset.yaml',
-        'dataset_info': data_root_path / 'dataset_info.yaml'
+        'dataset_info': data_root_path / 'dataset_info.json'
     }
 
     log_file_path = '/project/train/log/log.txt'
