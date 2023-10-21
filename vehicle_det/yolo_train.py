@@ -113,7 +113,7 @@ def find_model_file_path(default_model_file_path, is_best=False):
 
 def main():
     repo_dir_path = Path('/project/train/src_repo')
-    default_model_file_path = repo_dir_path / 'yolov8n.pt'
+    default_model_file_path = repo_dir_path / 'yolov8s.pt'
     model_save_dir_path = Path('/project/train/models')
     data_root_path = Path(r'/home/data')
     dataset_config_file_path = data_root_path / 'custom_dataset.yaml'
@@ -145,13 +145,14 @@ def main():
 
     logger.info(r'model_file_path: {}'.format(model_file_path))
 
-    model = YOLO(model_file_path.as_posix())
-
+    # model = YOLO(model_file_path.as_posix())
+    model = YOLO('yolov8s-p2.yaml')
+    model.load(model_file_path.as_posix())
     model.train(
         data=dataset_config_file_path.as_posix(),
         batch=16,
         seed=7,
-        epochs=300,
+        epochs=200,
         # warmup_epochs=0,
         # cls=1.0,
         project=model_save_dir_path.as_posix())

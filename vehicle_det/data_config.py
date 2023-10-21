@@ -36,8 +36,10 @@ class DataConfigManager:
         self.config_file_path_dict = config_file_path_dict
 
     def generate(self):
+        logging.info('Start parse_anno_info...')
         anno_info_list = self.parse_anno_info()
-        self.analyze_anno_infos(anno_info_list)
+
+        logging.info('Start generate_yolo_configs...')
         self.generate_yolo_configs(anno_info_list)
 
     def parse_anno_info(self):
@@ -75,6 +77,7 @@ class DataConfigManager:
     def analyze_anno_infos(self, anno_info_list):
         class_image_dict = {}
         class_obj_dict = {}
+        image_class_objs = []
         num_gt_dict = {}
 
         for anno_info in anno_info_list:
@@ -100,17 +103,81 @@ class DataConfigManager:
         logging.info(r'class_image_dict: {}'.format(class_image_dict))
         logging.info(r'class_obj_dict: {}'.format(class_obj_dict))
         logging.info(r'num_gt_dict: {}'.format(num_gt_dict))
+
         dataset_info_dict = {
             'class_image_dict': class_image_dict,
             'class_obj_dict': class_obj_dict,
             'num_gt_dict': num_gt_dict
         }
 
+        return dataset_info_dict
+
+    def serialize_dataset_info_dict(self, dataset_info_dict):
         dataset_info_file_path = self.config_file_path_dict['dataset_info']
         with open(dataset_info_file_path.as_posix(), 'w') as file_stream:
             json.dump(dataset_info_dict,
                       file_stream,
                       indent=4)
+
+    def select_balanced_anno_infos(self,
+                                   anno_info_list,
+                                   class_obj_dict):
+        image_class_objs = []
+
+        for anno_info in anno_info_list:
+            bnd_box_list = anno_info['bnd_box_list']
+            image_class_obj_dict = {}
+
+            for bnd_box_dict in bnd_box_list:
+                class_name = bnd_box_dict['class_name']
+
+                image_class_obj_dict.setdefault(class_name, 0)
+                image_class_obj_dict[class_name] += 1
+
+            image_class_obj_info = {
+                'anno_info': anno_info,
+                'image_class_obj_dict':image_class_obj_dict,
+                'selected': False
+            }
+
+            image_class_objs.append(image_class_obj_info)
+
+        class_obj_list = sorted(class_obj_dict.items(), key=lambda item: item[1], reverse=True)
+        min_num_class_obj = min(class_obj_dict.values())
+
+        selected_class_obj_dict = {}
+
+        for class_name, _ in class_obj_list:
+            selected_class_obj_dict.setdefault(class_name, 0)
+
+            for image_class_obj_info in image_class_objs:
+                if selected_class_obj_dict[class_name] >= min_num_class_obj:
+                    break
+
+                if image_class_obj_info['selected']:
+                    continue
+
+                image_class_obj_dict = image_class_obj_info['image_class_obj_dict']
+                num_obj = image_class_obj_dict.get(class_name, 0)
+
+                if num_obj == 0:
+                    continue
+
+                image_class_obj_info['selected'] = True
+
+                for curr_class_name, curr_num_obj in image_class_obj_dict.items():
+                    selected_class_obj_dict.setdefault(curr_class_name, 0)
+                    selected_class_obj_dict[curr_class_name] += curr_num_obj
+
+        selected_anno_info_list = []
+
+        for image_class_obj_info in image_class_objs:
+            if image_class_obj_info['selected']:
+                anno_info = image_class_obj_info['anno_info']
+                selected_anno_info_list.append(anno_info)
+
+        return selected_anno_info_list
+
 
     def generate_yolo_configs(self,
                               anno_info_list,
@@ -173,8 +240,26 @@ class DataConfigManager:
         num_val_data = min(max_num_val_data,
                            int(len(anno_info_list) * max_val_percent))
 
+        candidate_train_anno_info_list = anno_info_list[:-num_val_data]
+        # logging.info('Start analyze_anno_infos...')
+        # dataset_info_dict = self.analyze_anno_infos(candidate_train_anno_info_list)
+
+        # logging.info('Start select_balanced_anno_infos...')
+        # selected_anno_info_list = self.select_balanced_anno_infos(
+        #     candidate_train_anno_info_list,
+        #     dataset_info_dict['class_obj_dict']
+        # )
+
+        selected_anno_info_list = candidate_train_anno_info_list
+
+        logging.info('Start analyze_selected_anno_infos...')
+        selected_dataset_info_dict = self.analyze_anno_infos(selected_anno_info_list)
+
+        logging.info('Start serialize_dataset_info_dict...')
+        self.serialize_dataset_info_dict(selected_dataset_info_dict)
+
         anno_infos_dict = {
-        'train': anno_info_list[:-num_val_data],
+        'train': selected_anno_info_list,
         'val': anno_info_list[-num_val_data:]
         }
 

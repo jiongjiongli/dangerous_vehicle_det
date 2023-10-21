@@ -20,6 +20,9 @@ python vehicle_det/data_config.py
 echo 'Start cvmart_train...'
 python vehicle_det/yolo_train.py
 
+echo 'Start cvmart_val...'
+python vehicle_det/yolo_val.py
+
 echo 'Start export...'
 python vehicle_det/yolo_export.py
 
