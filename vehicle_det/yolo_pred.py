@@ -11,6 +11,7 @@ sys.path.append('/project/train/src_repo/ultralytics')
 
 from ultralytics.utils import LOGGER as logger
 from ultralytics import YOLO
+from vehicle_det.yolo_export import main as export_main
 
 
 def set_logging(log_file_path):
@@ -32,7 +33,7 @@ def find_model_file_path():
             continue
 
         dir_name = child_path.name
-        model_file_path = child_path  / 'weights' / 'best.pt'
+        model_file_path = child_path  / 'weights' / 'best.engine'
 
         if not model_file_path.exists():
             continue
@@ -78,7 +79,6 @@ def process_image(model, input_image=None, args=None, **kwargs):
     conf_thresh = 0.25
     iou_thresh = 0.7
     warning_types = ['dangerous_van', 'dangerous_tank']
-
     results = model(input_image, conf=conf_thresh,
                     iou=iou_thresh, half=True)
 
@@ -125,6 +125,8 @@ def process_image(model, input_image=None, args=None, **kwargs):
 
 
 def init():
+    export_main()
+
     log_file_path = r'/project/train/log/log.txt'
     set_logging(log_file_path)
 
@@ -132,6 +134,7 @@ def init():
     logger.info(r'model_file_path: {}'.format(model_file_path))
 
     model = YOLO(model_file_path.as_posix())
+
     random_img = np.random.randint(0,
                                    256,
                                    size=(512, 512, 3),

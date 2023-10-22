@@ -17,13 +17,16 @@ mkdir -p /project/train/result-graphs
 echo 'Start data_config...'
 python vehicle_det/data_config.py
 
-echo 'Start cvmart_train...'
+# echo 'Start yolo_tune...'
+# python vehicle_det/yolo_tune.py
+
+echo 'Start yolo_train...'
 python vehicle_det/yolo_train.py
 
-echo 'Start cvmart_val...'
-python vehicle_det/yolo_val.py
+# echo 'Start yolo_val...'
+# python vehicle_det/yolo_val.py
 
-echo 'Start export...'
+echo 'Start yolo_export...'
 python vehicle_det/yolo_export.py
 
 echo 'Completed!'

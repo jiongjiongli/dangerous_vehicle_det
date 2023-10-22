@@ -40,7 +40,8 @@ class DataConfigManager:
         anno_info_list = self.parse_anno_info()
 
         logging.info('Start generate_yolo_configs...')
-        self.generate_yolo_configs(anno_info_list)
+        self.generate_yolo_configs(anno_info_list,
+                                   expand_data=True)
 
     def parse_anno_info(self):
         anno_info_list = []
@@ -183,7 +184,8 @@ class DataConfigManager:
                               anno_info_list,
                               max_num_val_data=1000,
                               max_val_percent=0.2,
-                              seed=7):
+                              seed=7,
+                              expand_data=False):
         config_file_path_dict = self.config_file_path_dict
         class_name_dict = {}
 
@@ -250,7 +252,16 @@ class DataConfigManager:
         #     dataset_info_dict['class_obj_dict']
         # )
 
-        selected_anno_info_list = candidate_train_anno_info_list
+        if expand_data:
+            set_random_seed(seed)
+            logging.info('Start expand_data...')
+            selected_anno_info_list = self.expand_data(candidate_train_anno_info_list)
+            message = 'Expanded train data from {} to {}'.format(
+                len(candidate_train_anno_info_list),
+                len(selected_anno_info_list))
+            logging.info(message)
+        else:
+            selected_anno_info_list = candidate_train_anno_info_list
 
         logging.info('Start analyze_selected_anno_infos...')
         selected_dataset_info_dict = self.analyze_anno_infos(selected_anno_info_list)
@@ -292,6 +303,49 @@ class DataConfigManager:
 
         with open(config_file_path_dict['dataset'], 'w') as file_stream:
             yaml.dump(dataset_config, file_stream, indent=4)
+
+    def expand_data(self, anno_info_list):
+        min_num_expand = 3
+        class_obj_dict = {}
+
+        for anno_info in anno_info_list:
+            bnd_box_list = anno_info['bnd_box_list']
+
+            for bnd_box_dict in bnd_box_list:
+                class_name = bnd_box_dict['class_name']
+                class_obj_dict.setdefault(class_name, 0)
+                class_obj_dict[class_name] += 1
+
+        max_num_class_obj = max(class_obj_dict.values())
+
+        num_expand_class_dict = {}
+
+        for class_name, num_class_obj in class_obj_dict.items():
+            num_expanded = max_num_class_obj // num_class_obj
+            if num_expanded >= min_num_expand:
+                num_expand_class_dict[class_name] = num_expanded
+
+        message = r'num_expand_class_dict: {}'.format(num_expand_class_dict)
+        logging.info(message)
+
+        expand_list = []
+
+        for anno_info in anno_info_list:
+            num_expanded = 1
+            bnd_box_list = anno_info['bnd_box_list']
+
+            for bnd_box_dict in bnd_box_list:
+                class_name = bnd_box_dict['class_name']
+
+                curr_num_expanded = num_expand_class_dict.get(class_name, 1)
+                num_expanded = max(num_expanded, curr_num_expanded)
+
+            for _ in range(num_expanded - 1):
+                expand_list.append(anno_info)
+
+        all_anno_info_list = anno_info_list + expand_list
+        random.shuffle(all_anno_info_list)
+        return all_anno_info_list
 
     def parse_size(self, size):
         width = int(size.find('width').text)

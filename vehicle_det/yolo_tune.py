@@ -76,9 +76,21 @@ def init():
 
 
 def main():
+    model_save_dir_path = Path('/project/train/models')
+
+    data_root_path = Path(r'/home/data')
+    dataset_config_file_path = data_root_path / 'custom_dataset.yaml'
+
     model = init()
-    model.export(format='engine', simplify=True, half=True)
-    del model
+    model.tune(data=dataset_config_file_path.as_posix(),
+        batch=8,
+        seed=7,
+        epochs=10,
+        plots=False,
+        save=False,
+        val=False,
+        project=model_save_dir_path.as_posix())
 
 if __name__ == '__main__':
     main()
+
