@@ -58,7 +58,7 @@ class TensorboardLogger:
         file_paths = model_save_dir_path.rglob('*.*')
 
         for file_path in file_paths:
-            if file_path.suffix in ['.png']:
+            if file_path.suffix in ['.png'] and re.match(r'^confusion_matrix.*$', file_path.stem):
                 dest_file_path = result_graphs_dir_path / file_path.relative_to(model_save_dir_path)
                 dest_file_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(file_path, dest_file_path)

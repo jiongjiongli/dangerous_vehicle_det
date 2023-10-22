@@ -41,7 +41,7 @@ class DataConfigManager:
 
         logging.info('Start generate_yolo_configs...')
         self.generate_yolo_configs(anno_info_list,
-                                   expand_data=True)
+                                   expand_data=False)
 
     def parse_anno_info(self):
         anno_info_list = []
