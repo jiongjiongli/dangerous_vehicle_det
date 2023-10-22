@@ -83,6 +83,7 @@ def process_image(model, input_image=None, args=None, **kwargs):
                     iou=iou_thresh, half=True)
 
     target_count = 0
+    object_infos = []
 
     for result in results:
         class_names = result.names
@@ -114,7 +115,9 @@ def process_image(model, input_image=None, args=None, **kwargs):
                 'name':class_names[int(class_index)]
             }
 
-            fake_result['model_data']['objects'].append(object_info)
+            object_infos.append(object_info)
+
+    fake_result['model_data']['objects'] = object_infos
 
     if target_count > 0:
         fake_result['algorithm_data']['is_alert'] = True
